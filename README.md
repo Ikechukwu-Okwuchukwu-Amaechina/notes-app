@@ -5,6 +5,7 @@ A simple Node.js-based notes application repository scaffold. Use it to build a 
 ## Features
 - Node.js project scaffold ready for expansion
 - Sensible `.gitignore` for Node and environment files
+- Conventional MVC-style folders: `controllers/`, `routes/`, `models/`, `middleware/`, `config/`
 - Ready-to-edit entry point (`index.js`) referenced in `package.json`
 
 ## Installation
@@ -23,6 +24,19 @@ npm install
 ## Usage
 - Start developing by creating `index.js` and adding your app logic.
 - Add scripts in `package.json` (e.g., `dev`, `start`, `test`).
+- Place files in the suggested structure:
+
+### Project structure
+```
+notes-app/
+├─ config/        # App configuration (env, db, options)
+├─ controllers/   # Request handlers / business logic
+├─ middleware/    # Express or custom middleware
+├─ models/        # Data models or schemas
+├─ routes/        # Route definitions
+├─ package.json
+└─ README.md
+```
 
 ```powershell
 # Example: run the default script
