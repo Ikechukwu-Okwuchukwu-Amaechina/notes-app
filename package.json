@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "start": "node index.js",
+  "dev": "nodemon index.js",
+  "test": "jest --runInBand",
+  "test:watch": "jest --watch",
+  "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -16,5 +20,17 @@
     "url": "https://github.com/Ikechukwu-Okwuchukwu-Amaechina/notes-app/issues"
   },
   "homepage": "https://github.com/Ikechukwu-Okwuchukwu-Amaechina/notes-app#readme",
-  "description": ""
+  "description": "Simple notes API with JWT auth",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4",
+    "nodemon": "^3.1.0"
+  }
 }
