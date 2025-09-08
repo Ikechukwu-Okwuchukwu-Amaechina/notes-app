@@ -1,6 +1,6 @@
 const express = require('express');
 const auth = require('../middleware/auth');
-const { listNotesByUser, createNote, getNote, updateNote, deleteNote } = require('../models/noteModel');
+const { list, create, getOne, updateOne, remove } = require('../controllers/notesController');
 
 const router = express.Router();
 
@@ -8,39 +8,18 @@ const router = express.Router();
 router.use(auth);
 
 // list notes
-router.get('/', (req, res) => {
-  const notes = listNotesByUser(req.user.id);
-  res.json({ notes });
-});
+router.get('/', list);
 
 // create note
-router.post('/', (req, res) => {
-  const { title, content } = req.body || {};
-  if (!title) return res.status(400).json({ message: 'title is required' });
-  const note = createNote(req.user.id, { title, content: content || '' });
-  res.status(201).json({ note });
-});
+router.post('/', create);
 
 // get single note
-router.get('/:id', (req, res) => {
-  const note = getNote(req.user.id, req.params.id);
-  if (!note) return res.status(404).json({ message: 'Note not found' });
-  res.json({ note });
-});
+router.get('/:id', getOne);
 
 // update note
-router.put('/:id', (req, res) => {
-  const { title, content } = req.body || {};
-  const note = updateNote(req.user.id, req.params.id, { title, content });
-  if (!note) return res.status(404).json({ message: 'Note not found' });
-  res.json({ note });
-});
+router.put('/:id', updateOne);
 
 // delete note
-router.delete('/:id', (req, res) => {
-  const ok = deleteNote(req.user.id, req.params.id);
-  if (!ok) return res.status(404).json({ message: 'Note not found' });
-  res.json({ message: 'Deleted' });
-});
+router.delete('/:id', remove);
 
 module.exports = router;

@@ -1,56 +1,102 @@
-const request = require('supertest');
-
-// load test env before app
+// Very simple (novice-style) API tests
+// Make sure we load the DB setup first
 require('./setup');
+
+const request = require('supertest');
 const app = require('..');
 
-describe('Notes API smoke and auth flow', () => {
-  it('GET / should return ok', async () => {
+// give tests more time (Mongo can take a bit to start)
+jest.setTimeout(90000);
+
+describe('Notes API basic tests', () => {
+  let email;
+  let password;
+  let token;
+  let noteId;
+
+  it('GET / should say ok', async () => {
     const res = await request(app).get('/');
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ status: 'ok' });
+    expect(res.body.status).toBe('ok');
+    expect(typeof res.body.message).toBe('string');
   });
 
-  it('auth signup -> verify -> login -> CRUD notes', async () => {
-    const user = { name: 'Test', email: `u${Date.now()}@x.test`, phone: '1234567890', password: 'Password1!' };
+  it('can signup and verify', async () => {
+    email = 'user' + Date.now() + '@test.com';
+    password = 'Password1!';
 
-    // signup
-    const s1 = await request(app).post('/api/auth/signup').send(user);
-    expect(s1.status).toBe(201);
-    expect(s1.body.demoOtp).toBeDefined();
+    const signupRes = await request(app)
+      .post('/api/auth/signup')
+      .send({ name: 'Test User', email: email, phone: '1234567890', password: password });
 
-    // verify
-    const v1 = await request(app).post('/api/auth/verify-otp').send({ email: user.email, otp: s1.body.demoOtp });
-    expect(v1.status).toBe(200);
+    expect(signupRes.status).toBe(201);
+    expect(signupRes.body).toBeDefined();
+    expect(signupRes.body.demoOtp).toBeDefined();
 
-    // login
-    const l1 = await request(app).post('/api/auth/login').send({ email: user.email, password: user.password });
-    expect(l1.status).toBe(200);
-    expect(l1.body.token).toBeDefined();
+    const otp = signupRes.body.demoOtp;
 
-    const token = l1.body.token;
+    const verifyRes = await request(app)
+      .post('/api/auth/verify-otp')
+      .send({ email: email, otp: otp });
+    expect(verifyRes.status).toBe(200);
+  });
 
-    // list notes (empty)
-    const list0 = await request(app).get('/api/notes').set('Authorization', `Bearer ${token}`);
-    expect(list0.status).toBe(200);
-    expect(Array.isArray(list0.body.notes)).toBe(true);
+  it('can login and get a token', async () => {
+    const loginRes = await request(app)
+      .post('/api/auth/login')
+      .send({ email: email, password: password });
 
-    // create note
-    const n1 = await request(app).post('/api/notes').set('Authorization', `Bearer ${token}`).send({ title: 'First', content: 'Hello' });
-    expect(n1.status).toBe(201);
-    const noteId = n1.body.note.id;
+    expect(loginRes.status).toBe(200);
+    expect(loginRes.body).toBeDefined();
+    expect(loginRes.body.token).toBeDefined();
+    token = loginRes.body.token;
+  });
 
-    // get note
-    const g1 = await request(app).get(`/api/notes/${noteId}`).set('Authorization', `Bearer ${token}`);
-    expect(g1.status).toBe(200);
+  it('notes list is empty at first', async () => {
+    const res = await request(app)
+      .get('/api/notes')
+      .set('Authorization', 'Bearer ' + token);
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.notes)).toBe(true);
+    // should be 0 on a new account
+    expect(res.body.notes.length).toBe(0);
+  });
 
-    // update note
-    const u1 = await request(app).put(`/api/notes/${noteId}`).set('Authorization', `Bearer ${token}`).send({ content: 'Updated' });
-    expect(u1.status).toBe(200);
-    expect(u1.body.note.content).toBe('Updated');
+  it('can create a note', async () => {
+    const res = await request(app)
+      .post('/api/notes')
+      .set('Authorization', 'Bearer ' + token)
+      .send({ title: 'My First Note', content: 'Hello' });
+    expect(res.status).toBe(201);
+    expect(res.body).toBeDefined();
+    expect(res.body.note).toBeDefined();
+    noteId = res.body.note.id;
+    expect(typeof noteId).toBe('string');
+  });
 
-    // delete note
-    const d1 = await request(app).delete(`/api/notes/${noteId}`).set('Authorization', `Bearer ${token}`);
-    expect(d1.status).toBe(200);
+  it('can get that note', async () => {
+    const res = await request(app)
+      .get('/api/notes/' + noteId)
+      .set('Authorization', 'Bearer ' + token);
+    expect(res.status).toBe(200);
+    expect(res.body).toBeDefined();
+    expect(res.body.note).toBeDefined();
+    expect(res.body.note.id).toBe(noteId);
+  });
+
+  it('can update the note', async () => {
+    const res = await request(app)
+      .put('/api/notes/' + noteId)
+      .set('Authorization', 'Bearer ' + token)
+      .send({ content: 'Updated' });
+    expect(res.status).toBe(200);
+    expect(res.body.note.content).toBe('Updated');
+  });
+
+  it('can delete the note', async () => {
+    const res = await request(app)
+      .delete('/api/notes/' + noteId)
+      .set('Authorization', 'Bearer ' + token);
+    expect(res.status).toBe(200);
   });
 });
