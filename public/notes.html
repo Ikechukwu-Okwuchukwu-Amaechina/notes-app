@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes - Notes App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header><h1>Your Notes</h1></header>
+  <main>
+    <div class="card">
+      <form id="createNoteForm">
+        <label>Title</label>
+        <input name="title" required />
+        <label>Content</label>
+        <textarea name="content" rows="3" required></textarea>
+        <label>Tags</label>
+        <input name="tags" placeholder="work,urgent" />
+        <button type="submit">Create</button>
+        <div class="msg" id="createMsg"></div>
+      </form>
+    </div>
+
+    <div class="card filters">
+      <h3>Filters</h3>
+      <input id="singleTag" placeholder="single tag"/>
+      <input id="multiTags" placeholder="tag1,tag2"/>
+      <button id="refreshBtn" type="button">Refresh</button>
+    </div>
+
+    <div class="card">
+      <h3>Notes List</h3>
+      <div id="notesList">Loading...</div>
+    </div>
+  </main>
+
+  <script src="utils.js"></script>
+  <script src="js/notes.js"></script>
+</body>
+</html>

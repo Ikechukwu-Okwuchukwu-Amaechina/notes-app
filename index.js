@@ -1,11 +1,17 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
+const helmet = require('helmet');
 
 const app = express();
 
 // basic middlewares
 app.use(express.json());
 app.use(require('./middleware/logger'));
+app.use(helmet());
+
+// serve static frontend under /public so / remains a JSON health check
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // health check
 app.get('/', (req, res) => {

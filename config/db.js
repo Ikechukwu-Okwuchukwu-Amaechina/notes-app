@@ -1,11 +1,15 @@
 const mongoose = require('mongoose');
 
-const MONGO_URI = process.env.MONGO_URI ;
-
-async function connectDb() {
+async function connectDb(uri) {
   try {
+    const mongoUri = uri || process.env.MONGO_URI;
+    if (!mongoUri) {
+      throw new Error('MongoDB URI is not defined');
+    }
+
     if (mongoose.connection.readyState === 1) return mongoose.connection;
-    await mongoose.connect(MONGO_URI);
+
+    await mongoose.connect(mongoUri);
     console.log('MongoDB connected');
     return mongoose.connection;
   } catch (err) {
@@ -21,4 +25,4 @@ async function disconnectDb() {
   }
 }
 
-module.exports = { connectDb, disconnectDb };
+module.exports = { connectDb, disconnectDb, mongoose };

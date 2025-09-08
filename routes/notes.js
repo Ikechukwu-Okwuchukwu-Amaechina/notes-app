@@ -7,7 +7,7 @@ const router = express.Router();
 // protect all routes
 router.use(auth);
 
-// list notes
+// list notes (supports ?tag=work or ?tags=work,urgent)
 router.get('/', list);
 
 // create note

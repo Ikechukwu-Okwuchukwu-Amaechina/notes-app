@@ -8,10 +8,13 @@ function generateOtp() {
 
 async function signup(req, res) {
   try {
-    const { name, email, phone, password } = req.body || {};
-    if (!name || !email || !phone || !password) {
+  const { name, email, phone, password } = req.body || {};
+  if (!name || !email || !phone || !password) {
       return res.status(400).json({ message: 'name, email, phone, password are required' });
     }
+  // very simple phone validation (digits, +, -, spaces allowed)
+  const phoneOk = /^[+\d][\d\s-]{6,}$/.test(String(phone));
+  if (!phoneOk) return res.status(400).json({ message: 'invalid phone' });
     const existing = await findByEmail(email);
     if (existing) return res.status(409).json({ message: 'Email already in use' });
 
@@ -30,13 +33,7 @@ async function signup(req, res) {
       { expiresIn: '7d' }
     );
 
-    return res.status(201).json({
-      message: 'Signup successful. Please verify OTP sent to your email.',
-      demoOtp: otpCode,
-      userId: user.id,
-      userEmail:user.email,
-      token,
-    });
+  return res.status(201).json({ message: 'Signup successful. Verify OTP.', demoOtp: otpCode, userId: user.id, userEmail: user.email, token });
   } catch (err) {
     return res.status(500).json({ message: 'Server error' });
   }
@@ -86,9 +83,9 @@ async function login(req, res) {
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
 
-    if (!user.isVerified) {
-      return res.status(403).json({ message: 'Email not verified' });
-    }
+    // if (!user.isVerified) {
+    //   return res.status(403).json({ message: 'Email not verified' });
+    // }
 
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '7d' });
     return res.json({ token });

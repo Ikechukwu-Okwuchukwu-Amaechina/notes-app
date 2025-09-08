@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signup - Notes App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header><h1>Signup</h1></header>
+  <main>
+    <div class="card">
+      <form id="signupForm">
+        <label>Name</label>
+        <input name="name" required />
+        <label>Email</label>
+        <input name="email" type="email" required />
+        <label>Phone</label>
+        <input name="phone" required />
+        <label>Password</label>
+        <input name="password" type="password" required />
+        <button type="submit">Signup</button>
+        <div class="msg" id="signupMsg"></div>
+      </form>
+      <p>Already have an account? <a href="login.html">Login here</a></p>
+    </div>
+  </main>
+
+  <script src="utils.js"></script>
+  <script src="js/signup.js"></script>
+</body>
+</html>

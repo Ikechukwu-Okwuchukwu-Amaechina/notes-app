@@ -1,12 +1,14 @@
 # Notes App
 
-A simple Node.js-based notes application repository scaffold. Use it to build a CLI or HTTP service for creating, listing, and managing notes.
+Simple Notes API with JWT auth, MongoDB (Mongoose), secure headers, rate limiting, and a tiny frontend.
 
 ## Features
-- Node.js project scaffold ready for expansion
-- Sensible `.gitignore` for Node and environment files
-- Conventional MVC-style folders: `controllers/`, `routes/`, `models/`, `middleware/`, `config/`
-- Ready-to-edit entry point (`index.js`) referenced in `package.json`
+- Users: signup with OTP verification, login to get JWT
+- Notes: full CRUD with ownership checks
+- Tags: optional array, filter via `?tag` or `?tags=a,b`
+- Security: Helmet, rate-limited login
+- Timestamps: `createdAt`, `updatedAt`
+- Minimal frontend: `public/index.html`
 
 ## Installation
 1. Ensure you have Node.js 18+ installed.
@@ -17,54 +19,31 @@ A simple Node.js-based notes application repository scaffold. Use it to build a 
 git clone https://github.com/Ikechukwu-Okwuchukwu-Amaechina/notes-app.git
 cd notes-app
 
-# Install dependencies (none yet, but keeps workflow consistent)
+# Install dependencies
 npm install
 ```
 
-## Usage
-- Start developing by creating `index.js` and adding your app logic.
-- Add scripts in `package.json` (e.g., `dev`, `start`, `test`).
-- Place files in the suggested structure:
+## Run
 
-### Project structure
+1) Install Node.js (v18+ recommended) and MongoDB, or rely on tests that spin up an in-memory MongoDB.
+
+2) Create a .env in project root:
+
 ```
-notes-app/
-├─ config/        # App configuration (env, db, options)
-├─ controllers/   # Request handlers / business logic
-├─ middleware/    # Express or custom middleware
-├─ models/        # Data models or schemas
-├─ routes/        # Route definitions
-├─ package.json
-└─ README.md
+PORT=3000
+JWT_SECRET=super_secret_key
+MONGODB_URI=mongodb://localhost:27017/notes-app
 ```
+
+3) Start the server:
 
 ```powershell
-# Example: run the default script
-node index.js
+npm start
 ```
 
-## Technologies Used
-- Node.js
-- npm
+Visit http://localhost:3000 to try the minimal frontend.
 
-## Author
-Ikechukwu Okwuchukwu Amaechina
-Notes API (Novice-friendly)
-
-How to run
-
-1. Install Node.js (v18+ recommended).
-2. In this folder, install packages:
-	- npm install
-3. Create a .env file in the project root with:
-	- PORT=3000
-	- JWT_SECRET=super_secret_key
-4. Start the server:
-	- npm start
-
-You should see: Server running on http://localhost:3000
-
-Auth routes
+## Auth routes
 
 POST /api/auth/signup
 Body (JSON): { "name": "John", "email": "john@mail.com", "phone": "1234567890", "password": "pass123" }
@@ -80,21 +59,36 @@ Return: { token: "..." }
 Use the token in headers for notes routes:
 Authorization: Bearer YOUR_JWT_TOKEN
 
-Notes routes (all protected)
+## Notes routes (all protected)
 
 GET /api/notes
-POST /api/notes { "title": "My note", "content": "Hello" }
+- Query filters:
+	- /api/notes?tag=work → notes with tag "work"
+	- /api/notes?tags=work,urgent → notes containing both "work" and "urgent"
+
+POST /api/notes
+Body:
+```
+{ "title": "My note", "content": "Hello", "tags": ["work","urgent"] }
+```
+
 GET /api/notes/:id
-PUT /api/notes/:id { "title": "New title", "content": "Updated" }
+
+PUT /api/notes/:id
+Body (any subset):
+```
+{ "title": "New title", "content": "Updated", "tags": ["work"] }
+```
+
 DELETE /api/notes/:id
 
-Storage
+## Storage
 
-Data is saved to data/db.json as simple JSON. Good for learning, not for production.
+MongoDB via Mongoose. Indexes on `tags` and compound `{ userId, tags }` to speed up tag queries.
 
 ## Testing
 
-This project uses Jest and Supertest for integration tests.
+This project uses Jest and Supertest for integration tests. Tests use mongodb-memory-server.
 
 Commands:
 
@@ -105,5 +99,9 @@ npm run test:coverage # coverage report
 ```
 
 Notes:
-- Tests run against a temporary DB file (process.env.DB_FILE) and won't touch `data/db.json`.
-- The app is exported from `index.js` for testing; the server only starts when run directly.
+- The app is exported from `index.js`; server starts only when run directly.
+## Security
+
+- Helmet for secure HTTP headers
+- Rate limiting on login (15 minutes window, max 20 attempts)
+- Basic input validation for phone (signup) and tags (notes)
