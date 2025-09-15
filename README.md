@@ -10,6 +10,9 @@ Simple Notes API with JWT auth, MongoDB (Mongoose), secure headers, rate limitin
 - Timestamps: `createdAt`, `updatedAt`
 - Minimal frontend: `public/index.html`
 
+## Deployment Link
+https://notes-app-1-nhsk.onrender.com
+
 ## Installation
 1. Ensure you have Node.js 18+ installed.
 2. Clone the repository and install dependencies.
